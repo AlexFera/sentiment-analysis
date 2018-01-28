@@ -1,4 +1,6 @@
 import os
+import pickle
+import sys
 from time import time
 
 from sklearn.feature_extraction.text import CountVectorizer
@@ -21,12 +23,12 @@ def get_reviews(directory_path):
     return reviews
 
 
-def get_all_reviews():
+def get_all_reviews(pos_directory, neg_directory):
     """This function gets all the positive and negative reviews from the training folder
     and returns all list of list, where the first element is the text of the review and
     the second element is the label, 1 for a positive review and 0 for a negative review"""
-    pos_train_path = os.path.abspath('../../aclImdb_v1/aclImdb/train/pos/')
-    neg_train_path = os.path.abspath('../../aclImdb_v1/aclImdb/train/neg/')
+    pos_train_path = os.path.abspath(pos_directory)
+    neg_train_path = os.path.abspath(neg_directory)
     pos_reviews = get_reviews(pos_train_path)
     neg_reviews = get_reviews(neg_train_path)
 
@@ -55,8 +57,8 @@ def get_term_frequency_matrix(documents):
     return document_term_matrix, vectorizer
 
 
-def train():
-    reviews = get_all_reviews()
+def train(reviews):
+    """Learn a Naive Bayes classifier on the transformed data"""
     train_documents = [review[0] for review in reviews]
     term_frequency_matrix, vectorizer = get_term_frequency_matrix(train_documents)
     train_labels = [int(review[1]) for review in reviews]
@@ -66,13 +68,24 @@ def train():
     return bernoulli_classifier, vectorizer
 
 
-classifier, count_vectorizer = train()
+if __name__ == "__main__":
+    arg_parser = common.create_arg_parser()
+    parsed_args = arg_parser.parse_args(sys.argv[1:])
 
-label = classifier.predict(count_vectorizer.transform([
-    "The third movie produced by Howard Hughes, this gem was thought to be lost. It was recently restored and shown on TCM (12/15/04). The plot is a familiar one - two WW I soldiers escape from a German prison camp (guarded by an extremely lethargic German shepherd, who practically guides them out of the camp), stow away on a ship, and end up in Arabia, where they rescue the lovely Mary Astor. The restoration is very good overall, although there are two or three very rough sequences. The production is very good, and there are some very funny scenes. And did I mention that Mary Astor is in it? The film won an Academy Award for the now-defunct category of Best Direction of a Comedy."]))
-label2 = classifier.predict(count_vectorizer.transform(["This is the worst movie"]))
+    reviews = get_all_reviews(parsed_args.positive_data_directory, parsed_args.negative_data_directory)
+    # classifier, count_vectorizer = train(reviews)
 
-print(label[0])
-print(label2[0])
+    classifier_path = "naive_bayes_model.bin"
+    count_vectorizer_path = "count_vectorizer.bin"
+    # pickle.dump(classifier, open(classifier_path, "wb"))
+    # pickle.dump(count_vectorizer, open(count_vectorizer_path, "wb"))
+    classifier = pickle.load(open(classifier_path, "rb"))
+    count_vectorizer = pickle.load(open(count_vectorizer_path, "rb"))
 
-print("The end")
+    if parsed_args.test_phrase is not None:
+        to_predict = count_vectorizer.transform([parsed_args.test_phrase])
+        prediction_result = classifier.predict(to_predict)
+        if prediction_result[0] == 1:
+            print("It's a positive statement!")
+        else:
+            print("It's a negative statement!")
