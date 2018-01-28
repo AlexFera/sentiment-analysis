@@ -16,7 +16,7 @@ def create_arg_parser():
 
     parser.add_argument("-tnd", "--test-negative-data-directory",
                         help="Path to the test data directory..",
-                        default=".../../aclImdb_v1/aclImdb/train/neg/")
+                        default=".../../aclImdb_v1/aclImdb/test/neg/")
 
     parser.add_argument("-tp", "--test-phrase",
                         help="Provided test phrase to analyze sentiment.")
