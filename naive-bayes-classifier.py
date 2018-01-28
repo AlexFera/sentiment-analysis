@@ -28,15 +28,15 @@ def create_arg_parser():
 def get_reviews(directory_path):
     """"This function takes an absolute directory path, parses each file found and
     appends the content of the file to a list"""
-    reviews = []
+    lines = []
     for root, dirs, files in os.walk(directory_path, onerror=common.onerror):
         for file in files:
             file_path = os.path.join(root, file)
             with open(file_path, 'r') as f:
                 f_content = f.read()
-                reviews.append(f_content)
+                lines.append(f_content)
 
-    return reviews
+    return lines
 
 
 def get_all_reviews(pos_directory, neg_directory):
