@@ -16,7 +16,7 @@ def create_arg_parser():
 
     parser.add_argument("-tnd", "--test-negative-data-directory",
                         help="Path to the test data directory..",
-                        default=".../../aclImdb_v1/aclImdb/test/neg/")
+                        default="../../aclImdb_v1/aclImdb/test/neg/")
 
     parser.add_argument("-tp", "--test-phrase",
                         help="Provided test phrase to analyze sentiment.")
@@ -67,12 +67,12 @@ if __name__ == "__main__":
         else:
             print("It's a negative statement!")
     else:
-        print("For the positive reviews test from the folder the results are:")
-        number_pos, number_neg = get_results(parsed_args.test_positive_data_directory)
+        print("For the negative reviews from the test folder the results are:")
+        number_pos, number_neg = get_results(parsed_args.test_negative_data_directory)
         print("Number of pos:", number_pos)
         print("Number of neg:", number_neg)
 
-        print("For the negative reviews from the test folder the results are:")
-        number_pos, number_neg = get_results(parsed_args.test_negative_data_directory)
+        print("For the positive reviews test from the folder the results are:")
+        number_pos, number_neg = get_results(parsed_args.test_positive_data_directory)
         print("Number of pos:", number_pos)
         print("Number of neg:", number_neg)
