@@ -1,3 +1,4 @@
+import argparse
 import os
 import pickle
 import sys
@@ -7,6 +8,21 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import BernoulliNB
 
 import common
+
+
+def create_arg_parser():
+    """"Creates and returns the ArgumentParser object for our application"""
+
+    parser = argparse.ArgumentParser(description="Script that uses the Naive Bayes Algorithm for sentiment analysis.")
+    parser.add_argument("-pd", "--positive-data-directory",
+                        help="Path to the positive data set directory used for training.",
+                        default="../../aclImdb_v1/aclImdb/train/pos/")
+
+    parser.add_argument("-nd", "--negative-data-directory",
+                        help="Path to the negative data set directory used for training.",
+                        default="../../aclImdb_v1/aclImdb/train/neg/")
+
+    return parser
 
 
 def get_reviews(directory_path):
@@ -57,35 +73,15 @@ def get_term_frequency_matrix(documents):
     return document_term_matrix, vectorizer
 
 
-def train(reviews):
-    """Learn a Naive Bayes classifier on the transformed data"""
-    train_documents = [review[0] for review in reviews]
-    term_frequency_matrix, vectorizer = get_term_frequency_matrix(train_documents)
-    train_labels = [int(review[1]) for review in reviews]
-
-    bernoulli_classifier = BernoulliNB().fit(term_frequency_matrix, train_labels)
-
-    return bernoulli_classifier, vectorizer
-
-
 if __name__ == "__main__":
-    arg_parser = common.create_arg_parser()
+    arg_parser = create_arg_parser()
     parsed_args = arg_parser.parse_args(sys.argv[1:])
 
     reviews = get_all_reviews(parsed_args.positive_data_directory, parsed_args.negative_data_directory)
-    # classifier, count_vectorizer = train(reviews)
+    train_documents = [review[0] for review in reviews]
+    train_labels = [int(review[1]) for review in reviews]
+    term_frequency_matrix, count_vectorizer = get_term_frequency_matrix(train_documents)
+    classifier = BernoulliNB().fit(term_frequency_matrix, train_labels)
 
-    classifier_path = "naive_bayes_model.bin"
-    count_vectorizer_path = "count_vectorizer.bin"
-    # pickle.dump(classifier, open(classifier_path, "wb"))
-    # pickle.dump(count_vectorizer, open(count_vectorizer_path, "wb"))
-    classifier = pickle.load(open(classifier_path, "rb"))
-    count_vectorizer = pickle.load(open(count_vectorizer_path, "rb"))
-
-    if parsed_args.test_phrase is not None:
-        to_predict = count_vectorizer.transform([parsed_args.test_phrase])
-        prediction_result = classifier.predict(to_predict)
-        if prediction_result[0] == 1:
-            print("It's a positive statement!")
-        else:
-            print("It's a negative statement!")
+    pickle.dump(classifier, open(common.classifier_path, "wb"))
+    pickle.dump(count_vectorizer, open(common.count_vectorizer_path, "wb"))
