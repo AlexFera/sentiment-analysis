@@ -21,10 +21,13 @@ def create_arg_parser():
     parser.add_argument("-tp", "--test-phrase",
                         help="Provided test phrase to analyze sentiment.")
 
+    parser.add_argument("-nt", "--number-test-reviews",
+                        help="How many reviews to test.", type=int, default=100)
+
     return parser
 
 
-def get_test_data(directory_path):
+def get_test_data(directory_path, number_reviews):
     lines = []
     abs_path = os.path.abspath(directory_path)
     for root, dirs, files in os.walk(abs_path, onerror=common.onerror):
@@ -34,13 +37,13 @@ def get_test_data(directory_path):
                 f_content = f.read()
                 lines.append(f_content)
 
-    return lines
+    return lines[:number_reviews]
 
 
-def get_results(directory_path):
+def get_results(directory_path, number_reviews):
     pos_number = 0
     neg_number = 0
-    test_data = get_test_data(directory_path)
+    test_data = get_test_data(directory_path, number_reviews)
     for line in test_data:
         review_to_predict = count_vectorizer.transform([line])
         result = classifier.predict(review_to_predict)
@@ -67,12 +70,10 @@ if __name__ == "__main__":
         else:
             print("It's a negative statement!")
     else:
-        print("For the negative reviews from the test folder the results are:")
-        number_pos, number_neg = get_results(parsed_args.test_negative_data_directory)
-        print("Number of pos:", number_pos)
-        print("Number of neg:", number_neg)
+        number_pos, number_neg = get_results(parsed_args.test_negative_data_directory, parsed_args.number_test_reviews)
+        neg_success_rate = number_neg / parsed_args.number_test_reviews
+        print("For the negative reviews the success rate is: ", neg_success_rate)
 
-        print("For the positive reviews test from the folder the results are:")
-        number_pos, number_neg = get_results(parsed_args.test_positive_data_directory)
-        print("Number of pos:", number_pos)
-        print("Number of neg:", number_neg)
+        number_pos, number_neg = get_results(parsed_args.test_positive_data_directory, parsed_args.number_test_reviews)
+        pos_success_rate = number_pos / parsed_args.number_test_reviews
+        print("For the positive reviews the success rate is:", pos_success_rate)
