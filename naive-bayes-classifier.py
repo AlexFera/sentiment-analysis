@@ -4,7 +4,6 @@ import pickle
 import sys
 from time import time
 
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import BernoulliNB
 
 import common
@@ -69,7 +68,7 @@ def get_term_frequency_matrix(documents):
     into numerical features; In this case into term frequency representation.
     The data is represented as matrix of token counts."""
     print("Extracting term frequency...")
-    vectorizer = CountVectorizer(binary="true", stop_words="english")
+    vectorizer = common.StemmedCountVectorizer(min_df=3, binary="true", analyzer="word")
     t0 = time()
     document_term_matrix = vectorizer.fit_transform(documents)
     print("done in %0.3fs" % (time() - t0))
