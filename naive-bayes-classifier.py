@@ -10,6 +10,10 @@ from sklearn.naive_bayes import BernoulliNB
 import common
 
 
+# As the data set for training we are using the Large Movie Review Data Set v1.0
+# Link to the data set: http://ai.stanford.edu/~amaas/data/sentiment/
+
+
 def create_arg_parser():
     """"Creates and returns the ArgumentParser object for our application"""
 
